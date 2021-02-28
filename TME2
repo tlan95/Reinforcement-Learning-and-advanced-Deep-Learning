@@ -1,0 +1,650 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": 1,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "import time\n",
+    "\n",
+    "import gym\n",
+    "import gridworld\n",
+    "import numpy as np\n",
+    "import matplotlib.pyplot as plt\n",
+    "\n",
+    "import randomAgent"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 2,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "env = gym.make('gridworld-v0')"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 3,
+   "metadata": {},
+   "outputs": [
+    {
+     "data": {
+      "text/plain": [
+       "array([[1, 1, 1, 1, 1, 1],\n",
+       "       [1, 0, 0, 0, 3, 1],\n",
+       "       [1, 0, 1, 0, 5, 1],\n",
+       "       [1, 0, 0, 0, 2, 1],\n",
+       "       [1, 1, 1, 1, 1, 1],\n",
+       "       [1, 1, 1, 1, 1, 1]])"
+      ]
+     },
+     "execution_count": 3,
+     "metadata": {},
+     "output_type": "execute_result"
+    }
+   ],
+   "source": [
+    "env.reset()"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 4,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\"\"\"Choose map\"\"\"\n",
+    "k = 7\n",
+    "episode_count = 500\n",
+    "gamma = 0.99"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "# Gridworld"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "## Agents : Random, Policy Iteration, Value Iteration."
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### $\\mathbb{1}$ Random"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Agent:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 5,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "# %load randomAgent.py\n",
+    "import matplotlib\n",
+    "\n",
+    "matplotlib.use(\"TkAgg\")\n",
+    "import gym\n",
+    "import gridworld\n",
+    "from gym import wrappers, logger\n",
+    "import numpy as np\n",
+    "import copy\n",
+    "\n",
+    "\n",
+    "class RandomAgent(object):\n",
+    "\n",
+    "    def __init__(self, action_space):\n",
+    "        self.action_space = action_space\n",
+    "\n",
+    "    def act(self, observation, reward, done):\n",
+    "        return self.action_space.sample()    #action aléatoire\n",
+    "\n",
+    "    "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Run:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 6,
+   "metadata": {
+    "scrolled": false
+   },
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[44m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[46m \u001b[0m\u001b[41m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[46m \u001b[0m\u001b[41m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[41m \u001b[0m\u001b[46m \u001b[0m\u001b[45m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[42m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\n",
+      "done\n"
+     ]
+    }
+   ],
+   "source": [
+    "#def f_random_reward(k):\n",
+    "if __name__ == '__main__':\n",
+    "\n",
+    "    env = gym.make(\"gridworld-v0\")\n",
+    "    env.setPlan(f\"gridworldPlans/plan{k}.txt\", {0: -0.001, 3: 1, 4: 1, 5: -1, 6: -1})\n",
+    "\n",
+    "    env.seed(0)  # Initialise le seed du pseudo-random\n",
+    "    #print(env.action_space)  # Quelles sont les actions possibles\n",
+    "    #print(env.step(1))  # faire action 1 et retourne l'observation, le reward, et un done un booleen (jeu fini ou pas)\n",
+    "    env.render()  # permet de visualiser la grille du jeu \n",
+    "    env.render(mode=\"human\") #visualisation sur la console\n",
+    "    statedic, mdp = env.getMDP()  # recupere le mdp : statedic\n",
+    "    #print(\"Nombre d'etats : \",len(statedic))  # nombre d'etats ,statedic : etat-> numero de l'etat\n",
+    "    state, transitions = list(mdp.items())[0]\n",
+    "    #print(state)  # un etat du mdp\n",
+    "    #print(transitions)  # dictionnaire des transitions pour l'etat :  {action-> [proba,etat,reward,done]}\n",
+    "\n",
+    "    # Execution avec un Agent\n",
+    "    agent = RandomAgent(env.action_space) \n",
+    "\n",
+    "    episode_count = 500\n",
+    "    reward = 0\n",
+    "    done = False\n",
+    "    rsum = 0\n",
+    "    FPS = 0.0001\n",
+    "\n",
+    "    reward_random = []\n",
+    "    for i in range(episode_count):\n",
+    "        obs = env.reset()\n",
+    "        env.verbose = (i % 100 == 0 and i > 0)  # afficher 1 episode sur 100\n",
+    "        #if env.verbose:\n",
+    "            #env.render(FPS)\n",
+    "        j = 0\n",
+    "        rsum = 0\n",
+    "        while True:\n",
+    "            action = agent.act(obs, reward, done)\n",
+    "            obs, reward, done, _ = env.step(action)\n",
+    "            rsum += reward\n",
+    "            j += 1\n",
+    "            #if env.verbose:\n",
+    "                #env.render(FPS)\n",
+    "            if done:\n",
+    "                reward_random.append(rsum)\n",
+    "                #print(\"Episode : \" + str(i) + \" rsum=\" + str(rsum) + \", \" + str(j) + \" actions\")\n",
+    "                break\n",
+    "\n",
+    "    print(\"done\")\n",
+    "    env.close()\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### $\\mathbb{2}$ Value_Iteration"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Agent:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 7,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "class Value_Iteration_Agent(object):\n",
+    "\n",
+    "    def __init__(self, action_space):\n",
+    "        self.action_space = action_space\n",
+    "\n",
+    "    def act(self, observation, reward, done):\n",
+    "        obs = gridworld.gridworld_env.GridworldEnv.state2str(observation)\n",
+    "        return np.argmax(\n",
+    "            [sum((r + gamma * V[statedic[s_prime]])*p for p, s_prime, r, _ in mdp[obs][a]) for a in mdp[obs].keys()]\n",
+    "    )\n",
+    "\n",
+    "\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "Run:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 8,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[44m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[46m \u001b[0m\u001b[41m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[46m \u001b[0m\u001b[41m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[41m \u001b[0m\u001b[46m \u001b[0m\u001b[45m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[42m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\n",
+      "done\n"
+     ]
+    }
+   ],
+   "source": [
+    "start = time.time()\n",
+    "\n",
+    "if __name__ == '__main__':\n",
+    "    \n",
+    "            start = time.time()\n",
+    "\n",
+    "            env = gym.make(\"gridworld-v0\")\n",
+    "            env.setPlan(f\"gridworldPlans/plan{k}.txt\", {0: -0.001, 3: 1, 4: 1, 5: -1, 6: -1})\n",
+    "\n",
+    "            env.seed(0)  # Initialise le seed du pseudo-random\n",
+    "            env.render()  # permet de visualiser la grille du jeu\n",
+    "            env.render(mode=\"human\") #visualisation sur la console\n",
+    "            statedic, mdp = env.getMDP()  # recupere le mdp : statedic\n",
+    "            state, transitions = list(mdp.items())[0]\n",
+    "\n",
+    "\n",
+    "            #print(\"Nombre d'etats : \",len(statedic))  # nombre d'etats ,statedic : etat-> numero de l'etat\n",
+    "            #print(state)  # un etat du mdp\n",
+    "            #print(transitions)  # dictionnaire des transitions pour l'etat :  {action-> [proba,etat,reward,done]}\n",
+    "            #print(env.action_space)  # Quelles sont les actions possibles\n",
+    "            #print(env.step(1))  # faire action 1 et retourne l'observation, le reward, et un done un booleen (jeu fini ou pas)\n",
+    "\n",
+    "            # Execution avec un Agent\n",
+    "            agent = Value_Iteration_Agent(env.action_space)\n",
+    "\n",
+    "\n",
+    "            episode_count = 500\n",
+    "            reward = 0\n",
+    "            done = False\n",
+    "            rsum = 0\n",
+    "            FPS = 0.0001\n",
+    "\n",
+    "            #Here we put the datas relative to the value iteration and we make then the \"value iteration algorithm\"\n",
+    "            obs = env.reset()\n",
+    "            tol = 1e-12\n",
+    "            cont = True\n",
+    "            gamma = 0.99\n",
+    "            V = np.zeros(len(statedic))\n",
+    "\n",
+    "            V_analysis = [] #Allows us to see that this algorithm converges\n",
+    "            while cont:\n",
+    "                oldV = V.copy()\n",
+    "                for s in mdp.keys(): # note: all states are not represented in the mdp\n",
+    "                    V[statedic[s]] = max([sum([(r + gamma * V[statedic[s_prime]]) * p for p, s_prime, r, _ in mdp[s][a]]) for a in mdp[s].keys()])\n",
+    "                diff = np.max(np.abs(V - oldV))\n",
+    "                cont = diff > tol\n",
+    "                V_analysis.append(diff)\n",
+    "\n",
+    "            agent.values = V\n",
+    "            #print(V_analysis)\n",
+    "\n",
+    "            reward_analysis = []\n",
+    "\n",
+    "            for i in range(episode_count):\n",
+    "                obs = env.reset()\n",
+    "                env.verbose = (i % 100 == 0 and i > 0)  # afficher 1 episode sur 100\n",
+    "                if env.verbose:\n",
+    "                    env.render(FPS)\n",
+    "                j = 0\n",
+    "                rsum = 0\n",
+    "                while True:\n",
+    "                    action = agent.act(obs, reward, done)\n",
+    "                    obs, reward, done, _ = env.step(action)\n",
+    "                    rsum += gamma ** j * reward\n",
+    "                    j += 1\n",
+    "                    #if env.verbose:\n",
+    "                        #env.render(FPS)\n",
+    "                    if done:\n",
+    "                        reward_analysis.append(rsum)\n",
+    "                        #print(\"Episode : \" + str(i) + \" rsum=\" + str(rsum) + \", \" + str(j) + \" actions\")\n",
+    "                        break\n",
+    "\n",
+    "            print(\"done\")\n",
+    "            env.close()\n",
+    "        \n",
+    "stop = time.time()\n",
+    "\n",
+    "time_value = stop - start"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### $\\mathbb{3}$ Policy_Iteration"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "agent:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 9,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "class Policy_Iteration_Agent(object):\n",
+    "    \n",
+    "    def __init__(self,action_space):\n",
+    "        self.action_space = action_space\n",
+    "        \n",
+    "    def act(self, observation, reward, done):\n",
+    "        obs = gridworld.gridworld_env.GridworldEnv.state2str(observation)\n",
+    "        return np.argmax(\n",
+    "            [np.sum((r + gamma * V_current[statedic[s_prime]])*p for p, s_prime, r, _ in mdp[obs][a]) for a in mdp[obs].keys()]\n",
+    "    ) #Same idea than in value iteration but with V_current\n",
+    "        "
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "run:"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 10,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[44m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[46m \u001b[0m\u001b[41m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[46m \u001b[0m\u001b[41m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[41m \u001b[0m\u001b[46m \u001b[0m\u001b[45m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[42m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[47m \u001b[0m\u001b[40m \u001b[0m\n",
+      "\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\u001b[40m \u001b[0m\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "<ipython-input-10-7ada56fd1eba>:58: DeprecationWarning: Calling np.sum(generator) is deprecated, and in the future will give a different result. Use np.sum(np.fromiter(generator)) or the python sum builtin instead.\n",
+      "  pi = np.argmax([np.sum((r + gamma * oldV[statedic[s_prime]])*p for p, s_prime, r, _ in mdp[s][a]) for a in mdp[s].keys()])\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "done\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "<ipython-input-9-5c2d19d454f0>:9: DeprecationWarning: Calling np.sum(generator) is deprecated, and in the future will give a different result. Use np.sum(np.fromiter(generator)) or the python sum builtin instead.\n",
+      "  [np.sum((r + gamma * V_current[statedic[s_prime]])*p for p, s_prime, r, _ in mdp[obs][a]) for a in mdp[obs].keys()]\n"
+     ]
+    }
+   ],
+   "source": [
+    "start = time.time()\n",
+    "\n",
+    "if __name__ == '__main__':\n",
+    "\n",
+    "\n",
+    "    env = gym.make(\"gridworld-v0\")\n",
+    "    env.setPlan(f\"gridworldPlans/plan{k}.txt\", {0: -0.001, 3: 1, 4: 1, 5: -1, 6: -1})\n",
+    "\n",
+    "    env.seed(0)  # Initialise le seed du pseudo-random\n",
+    "    #print(env.action_space)  # Quelles sont les actions possibles\n",
+    "    #print(env.step(1))  # faire action 1 et retourne l'observation, le reward, et un done un booleen (jeu fini ou pas)\n",
+    "    env.render()  # permet de visualiser la grille du jeu\n",
+    "    env.render(mode=\"human\") #visualisation sur la console\n",
+    "    statedic, mdp = env.getMDP()  # recupere le mdp : statedic\n",
+    "    #print(\"Nombre d'etats : \",len(statedic))  # nombre d'etats ,statedic : etat-> numero de l'etat\n",
+    "    state, transitions = list(mdp.items())[0]\n",
+    "    #print(state)  # un etat du mdp\n",
+    "    #print(transitions)  # dictionnaire des transitions pour l'etat :  {action-> [proba,etat,reward,done]}\n",
+    "\n",
+    "    # Execution avec un Agent\n",
+    "    agent = Policy_Iteration_Agent(env.action_space)\n",
+    "\n",
+    "\n",
+    "    episode_count = 500\n",
+    "    reward = 0\n",
+    "    done = False\n",
+    "    rsum = 0\n",
+    "    FPS = 0.0001\n",
+    "    \n",
+    "    #Here we put the datas relative to the value policy and we make later the \"value iteration algorithm\"\n",
+    "    tol = 1e-1\n",
+    "    cont = True\n",
+    "    gamma = 0.99\n",
+    "    V_current = np.zeros(len(statedic))\n",
+    "    \n",
+    "    V_PI_analysis = [] #Allows us to see that this algorithm converges\n",
+    "    \n",
+    "    \n",
+    "    reward_analysis_pi = []\n",
+    "    \n",
+    "    \n",
+    "    for i in range(episode_count):\n",
+    "        obs = env.reset()\n",
+    "        env.verbose = (i % 100 == 0 and i > 0)  # afficher 1 episode sur 100\n",
+    "        #if env.verbose:\n",
+    "            #env.render(FPS)\n",
+    "        j = 0\n",
+    "        rsum = 0\n",
+    "        \n",
+    "        while True:\n",
+    "            cont = True\n",
+    "            compteur_cv = 0\n",
+    "            while cont:  ##Value Iteration Algorithm\n",
+    "                compteur_cv += 1\n",
+    "                \n",
+    "                oldV = V_current.copy()\n",
+    "                for s in mdp.keys(): # note: all states are not represented in the mdp\n",
+    "                    pi = np.argmax([np.sum((r + gamma * oldV[statedic[s_prime]])*p for p, s_prime, r, _ in mdp[s][a]) for a in mdp[s].keys()])  \n",
+    "                    V_current[statedic[s]] = np.sum([(r + gamma * oldV[statedic[s_prime]]) * p for p, s_prime, r, _ in mdp[s][pi]])\n",
+    "                diff = np.max(np.abs(V_current - oldV))\n",
+    "                cont = diff > tol\n",
+    "            V_PI_analysis.append(compteur_cv)\n",
+    "            \n",
+    "            agent.values = V_current\n",
+    "            action = agent.act(obs, reward, done)\n",
+    "            obs, reward, done, _ = env.step(action)\n",
+    "            rsum += gamma ** j * reward\n",
+    "            j += 1\n",
+    "            #if env.verbose:\n",
+    "                #env.render(FPS)\n",
+    "            if done:\n",
+    "                reward_analysis_pi.append(rsum)\n",
+    "                #print(\"Episode : \" + str(i) + \" rsum=\" + str(rsum) + \", \" + str(j) + \" actions\")\n",
+    "                break\n",
+    "\n",
+    "    print(\"done\")\n",
+    "    env.close()\n",
+    "    \n",
+    "    \n",
+    "stop = time.time()\n",
+    "\n",
+    "\n",
+    "time_policy = stop - start"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Reward mean and var"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 11,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "-0.7381040000000001 0.7187087611840006\n",
+      "2.0671320396363027 0.2622589382571328\n",
+      "2.070279489944671 0.2517991430940651\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(np.array(reward_random).mean(),np.array(reward_random).var()) #Random\n",
+    "\n",
+    "print(np.array(reward_analysis).mean(),np.array(reward_analysis).var()) #VI\n",
+    "\n",
+    "print(np.array(reward_analysis_pi).mean(),np.array(reward_analysis_pi).var()) #PI\n"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Graphs"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 12,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "fig, ax = plt.subplots()\n",
+    "ax.plot(reward_random , label=\"reward_random\")\n",
+    "ax.plot(reward_analysis, label=\"reward_value_iteration\")\n",
+    "ax.plot(reward_analysis_pi, label=\"reward_policy_iteration\")\n",
+    "ax.set_title('Reward_by_episode')\n",
+    "ax.set_xlabel('episode')\n",
+    "ax.set_ylabel('reward')\n",
+    "ax.legend(loc=\"best\");"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 13,
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "fig.savefig(f'Agent_on_map_{k}.png', dpi=fig.dpi)"
+   ]
+  },
+  {
+   "cell_type": "markdown",
+   "metadata": {},
+   "source": [
+    "### Time"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": 14,
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "27.3056480884552 6413.577085494995\n"
+     ]
+    }
+   ],
+   "source": [
+    "print(time_value,time_policy)"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3",
+   "language": "python",
+   "name": "python3"
+  },
+  "language_info": {
+   "codemirror_mode": {
+    "name": "ipython",
+    "version": 3
+   },
+   "file_extension": ".py",
+   "mimetype": "text/x-python",
+   "name": "python",
+   "nbconvert_exporter": "python",
+   "pygments_lexer": "ipython3",
+   "version": "3.8.5"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 4
+}
